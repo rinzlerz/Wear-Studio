@@ -1,0 +1,17 @@
+name: wear_studio_core
+description: >-
+  Platform-independent Wear Studio domain code: configuration models,
+  JSON serialization, schema versioning, validation and the sync protocol.
+  Pure Dart (no Flutter dependency) so it is shared by the phone and watch apps.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+
+dev_dependencies:
+  lints: ">=5.0.0 <7.0.0"
+  # Wide range on purpose: the workspace shares one resolution with
+  # flutter_test, which pins test_api; pub picks a compatible `test`.
+  test: ">=1.24.0 <2.0.0"

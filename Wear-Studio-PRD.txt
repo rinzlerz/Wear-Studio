@@ -1,0 +1,1075 @@
+# PRODUCT REQUIREMENTS DOCUMENT (PRD)
+# Wear Studio
+
+**Version:** 1.1  
+**Status:** Initial Product Specification  
+**Product Type:** Flutter-based Smartwatch Customization Platform  
+**Primary Framework:** Flutter  
+**Primary Language:** Dart  
+**Target Platform:** Android + Wear OS
+
+---
+
+# 1. Product Overview
+
+## 1.1 Product Vision
+
+Wear Studio is a customizable smartwatch interface platform designed for Wear OS devices.
+
+The platform enables users to create, customize and interact with their own smartwatch experiences through a Flutter-powered Android companion application and a smartwatch application.
+
+Unlike conventional watch-face applications that provide predefined layouts and limited customization, Wear Studio aims to provide a modular interface system where users can:
+
+- Create personalized smartwatch layouts.
+- Add, remove, reposition and resize widgets.
+- Customize wallpapers, colours, typography and themes.
+- Configure widget functionality.
+- Interact with animated UI components.
+- Create and save multiple interface profiles.
+- Synchronize configurations between their smartphone and smartwatch.
+- Extend the system with additional widgets and functionality in the future.
+
+The long-term vision is to develop a personal smartwatch interface ecosystem where users have greater control over the appearance, functionality and interaction of their Wear OS devices.
+
+## 1.2 Product Objectives
+
+1. Build a flexible smartwatch UI rendering engine using Flutter.
+2. Develop a visual watch-face editor for Android.
+3. Develop a modular and reusable widget system.
+4. Implement a configurable theme engine.
+5. Enable smartphone-to-watch synchronization.
+6. Support interactive animations and dynamic visualizations.
+7. Maintain offline functionality on the smartwatch.
+8. Support multiple Wear OS manufacturers.
+9. Maintain a clean separation between Flutter application logic and native Android integrations.
+
+## 1.3 Target Users
+
+Primary users:
+- Technology enthusiasts.
+- Wear OS smartwatch owners.
+- Users interested in smartwatch customization.
+- Developers interested in personalized wearable experiences.
+
+## 1.4 Target Devices
+
+Smartwatches:
+- Samsung Galaxy Watch series running Wear OS.
+- Google Pixel Watch series.
+- Other compatible Wear OS devices.
+
+Smartphones:
+- Android smartphones.
+
+---
+
+# 2. Technology Strategy
+
+Wear Studio will adopt a Flutter-first development approach.
+
+Flutter and Dart will handle the majority of the application logic, UI rendering, state management, configuration management and companion application development.
+
+However, certain Wear OS capabilities require native Android integration.
+
+The project must not attempt to implement unsupported platform functionality purely in Flutter.
+
+## 2.1 Technology Stack
+
+| Component | Technology |
+|---|---|
+| Primary framework | Flutter |
+| Programming language | Dart |
+| Phone application | Flutter |
+| Interactive watch application | Flutter, subject to Wear OS feasibility validation |
+| UI rendering | Flutter Widgets |
+| State management | Riverpod |
+| Navigation | GoRouter |
+| Local storage | SQLite / Drift or Hive |
+| Configuration serialization | JSON |
+| Phone-watch communication | Wear OS Data Layer API |
+| Native Android integration | Kotlin |
+| Platform communication | MethodChannel / EventChannel |
+| Native watch face | Watch Face Format (WFF) |
+| Build system | Flutter + Gradle |
+| IDE | Android Studio / VS Code |
+| Version control | Git / GitHub |
+
+Dependencies should be selected based on current compatibility with the targeted Flutter and Android versions.
+
+## 2.2 Flutter and Native Android Responsibilities
+
+**Flutter / Dart responsibilities:**
+- Companion application UI.
+- Watch customization editor.
+- Widget rendering.
+- Theme management.
+- Animation management.
+- Profile management.
+- Configuration models.
+- Application state management.
+- Local configuration storage.
+- Business logic.
+
+**Native Kotlin responsibilities:**
+- Wear OS Data Layer API integration where no suitable Flutter plugin exists.
+- Native Android system integrations.
+- WFF watch-face implementation.
+- Watch-specific platform functionality unavailable through Flutter.
+- Platform lifecycle and permission integration where necessary.
+
+The native layer should expose a clean interface to Flutter rather than duplicating application business logic.
+
+## 2.3 Technical Feasibility Requirement
+
+Before committing to the final smartwatch implementation, conduct a proof of concept to verify:
+
+1. Flutter application execution on a Wear OS device.
+2. Circular display compatibility.
+3. Touch interaction.
+4. Device lifecycle behaviour.
+5. Performance and memory usage.
+6. Battery consumption.
+7. Bluetooth communication.
+8. Required Wear OS API access.
+
+If Flutter introduces unacceptable limitations for the smartwatch runtime, the project may use a native Kotlin Wear OS application while retaining Flutter for the phone companion.
+
+This decision must be based on a documented technical evaluation.
+
+---
+
+# 3. Product Architecture
+
+## 3.1 System Components
+
+Wear Studio consists of three primary deliverables.
+
+### A. Wear Studio Companion
+
+Flutter-based Android application.
+
+Responsibilities:
+- Watch connection management.
+- Watch-face editor.
+- Widget management.
+- Theme management.
+- Profile management.
+- Asset management.
+- Configuration synchronization.
+- Live smartwatch preview.
+
+### B. Wear Studio for Wear OS
+
+Interactive smartwatch application.
+
+Preferred implementation: Flutter.
+
+Responsibilities:
+- Widget rendering.
+- Widget interaction.
+- Theme application.
+- Animation rendering.
+- Local configuration storage.
+- Media integration.
+- Device integration.
+- Offline functionality.
+
+A native Kotlin implementation may be used if the Flutter feasibility assessment identifies significant platform limitations.
+
+### C. Wear Studio Watch Face
+
+Native Wear OS watch face using Watch Face Format.
+
+Responsibilities:
+- Display time and date.
+- Display supported complications.
+- Support configurable appearance.
+- Support ambient mode.
+- Provide system-integrated watch-face functionality.
+
+This component is separate from the Flutter application.
+
+## 3.2 High-Level Architecture
+
+```text
+                  ANDROID PHONE
+          +---------------------------+
+          |   Wear Studio Companion   |
+          |---------------------------|
+          | Flutter / Dart            |
+          |                           |
+          | Watch Face Editor         |
+          | Widget Manager            |
+          | Theme Manager             |
+          | Profile Manager           |
+          | Asset Manager             |
+          | Sync Manager              |
+          +-------------+-------------+
+                        |
+                        |
+                 Wear OS Data Layer
+                        |
+          +-------------+-------------+
+          |       SMARTWATCH          |
+          |                           |
+          |  Wear Studio Runtime      |
+          |---------------------------|
+          | Flutter / Dart            |
+          |                           |
+          | UI Rendering Engine       |
+          | Widget Runtime            |
+          | Theme Engine              |
+          | Animation Engine          |
+          | Interaction Handler       |
+          | Configuration Manager     |
+          +-------------+-------------+
+                        |
+                  Native Bridge
+                        |
+          +-------------+-------------+
+          |      ANDROID / WEAR OS    |
+          |---------------------------|
+          | Kotlin Platform Layer     |
+          | Wear OS APIs               |
+          | Media Integration          |
+          | System Integration         |
+          | WFF Watch Face             |
+          +---------------------------+
+```
+
+## 3.3 Communication Architecture
+
+Use Wear OS Data Layer API for communication between the paired smartphone and smartwatch.
+
+Native Kotlin integration may expose communication functionality to Flutter through platform channels.
+
+Recommended communication mechanisms:
+
+- DataClient: synchronized configuration and persistent data.
+- MessageClient: immediate commands and short-lived messages.
+- Asset delivery: larger resources such as wallpapers and images.
+
+The architecture must support offline operation.
+
+The smartwatch must retain its last synchronized configuration locally.
+
+---
+
+# 4. Flutter Project Structure
+
+Use a modular Flutter monorepo.
+
+Proposed repository structure:
+
+```text
+wear-studio/
+│
+├── apps/
+│   │
+│   ├── companion/
+│   │   ├── lib/
+│   │   ├── android/
+│   │   ├── assets/
+│   │   └── pubspec.yaml
+│   │
+│   └── wear/
+│       ├── lib/
+│       ├── android/
+│       ├── assets/
+│       └── pubspec.yaml
+│
+├── packages/
+│   │
+│   ├── core/
+│   ├── data/
+│   ├── communication/
+│   ├── widget_engine/
+│   ├── theme_engine/
+│   ├── configuration/
+│   ├── animations/
+│   └── common_ui/
+│
+├── native/
+│   │
+│   ├── android/
+│   │   ├── platform_bridge/
+│   │   └── watch_face/
+│   │
+│   └── wear_os/
+│       └── data_layer/
+│
+├── docs/
+│   ├── architecture/
+│   ├── api/
+│   └── development/
+│
+├── tests/
+│
+├── README.md
+└── LICENSE
+```
+
+This structure is a proposed starting point.
+
+Claude must evaluate whether the Flutter applications should share packages, whether the smartwatch runtime requires a separate Android host project, and whether the native modules should be included in the same Gradle build.
+
+Do not create unnecessary modules before their responsibilities are established.
+
+---
+
+# 5. Functional Requirements
+
+## FR-001: Watch Connectivity
+
+The system must support communication between the Android companion and Wear OS smartwatch.
+
+Requirements:
+
+- Detect connected watch nodes.
+- Identify the target smartwatch.
+- Display connection status.
+- Synchronize configuration.
+- Handle temporary disconnections.
+- Retry synchronization when connectivity returns.
+- Retain local configurations.
+
+Acceptance criteria:
+
+- The phone can identify a paired smartwatch.
+- The phone can transmit configuration data.
+- The watch can receive and persist configuration data.
+- The watch continues functioning when disconnected.
+- Reconnection does not create duplicate widgets or configurations.
+
+## FR-002: Watch Face Editor
+
+The Flutter companion application must provide a visual customization editor.
+
+Features:
+
+- Circular smartwatch preview.
+- Add widgets from a widget library.
+- Remove widgets.
+- Drag and reposition widgets.
+- Resize widgets.
+- Support grid snapping.
+- Support free positioning.
+- Configure widget properties.
+- Preview theme changes.
+- Save and load layouts.
+
+The editor must use normalized coordinates instead of fixed device pixels.
+
+Each widget must have:
+
+- Unique identifier.
+- Widget type.
+- Position.
+- Dimensions.
+- Z-order.
+- Configuration.
+- Visibility state.
+
+Acceptance criteria:
+
+- Users can add multiple widgets.
+- Widgets can be moved independently.
+- Widgets can be resized within defined constraints.
+- Changes can be saved and restored.
+- Preview adapts to different smartwatch dimensions.
+
+## FR-003: Widget Management System
+
+The smartwatch must support modular widgets.
+
+Initial built-in widgets:
+
+| Widget | Functionality |
+|---|---|
+| Digital Clock | Time and date |
+| Battery | Watch battery level |
+| Weather | Weather information |
+| Music | Playback information and controls |
+| Audio Visualizer | Waveform visualization |
+| System Status | Connectivity and device information |
+| Phone Integration | Smartphone-related actions |
+| AI Assistant | Future assistant integration |
+| Smart Home | Future IoT integration |
+
+Each widget must be independently configurable.
+
+The widget system must provide a common internal contract for:
+
+- Widget identification.
+- Rendering.
+- Configuration.
+- User interaction.
+- State management.
+- Lifecycle management.
+- Data source integration.
+
+Implement a registry-based widget architecture.
+
+New built-in widgets must be addable without rewriting the UI rendering engine.
+
+The architecture should allow future third-party widget extensions through a controlled plugin interface.
+
+External executable plugins are not required in the initial release.
+
+## FR-004: Theme Engine
+
+Users must be able to customize their smartwatch appearance.
+
+Theme properties:
+
+- Background wallpaper.
+- Primary colour.
+- Secondary colour.
+- Accent colour.
+- Typography.
+- Font size.
+- Widget appearance.
+- Borders.
+- Glow effects.
+- Animation presets.
+
+Initial themes:
+
+1. Default Minimalist.
+2. Cyberpunk.
+3. DedSec / Hacker.
+4. JARVIS / AI Interface.
+
+Themes must be independent of widget functionality.
+
+Changing a theme must not require rebuilding individual widgets.
+
+## FR-005: Animation Engine
+
+The smartwatch application must support interactive animations.
+
+Examples:
+
+- Circular HUD animation.
+- Scanning animation.
+- Expanding widget animation.
+- Glitch transitions.
+- Rotating indicators.
+- Animated waveforms.
+- Touch-triggered visual effects.
+
+Use Flutter animation capabilities where suitable.
+
+Requirements:
+
+- Animations respond to user interaction.
+- Animations support theme configurations.
+- Animations are optimized for smartwatch hardware.
+- Animations stop or reduce activity when the application is not visible.
+- Animation intensity is configurable.
+
+Native WFF rendering must follow supported platform capabilities.
+
+Advanced interactive animations belong to the interactive application.
+
+## FR-006: Music Integration
+
+The music widget must provide media information and playback controls.
+
+Features:
+
+- Display current song title.
+- Display artist name.
+- Display playback status.
+- Play/pause.
+- Next track.
+- Previous track.
+- Display album artwork when available.
+- Provide waveform visualization.
+
+The implementation must distinguish between media metadata access and raw audio visualization.
+
+For external music applications, investigate Android MediaSession integration and supported audio capture mechanisms.
+
+Do not assume that media-session access automatically provides raw audio samples.
+
+Initial implementation:
+1. Media metadata.
+2. Playback controls.
+3. Simulated waveform based on playback state.
+
+Real audio-reactive visualization is a separate technical milestone subject to platform permissions and limitations.
+
+## FR-007: Phone Integration
+
+The smartwatch must support selected smartphone actions.
+
+Initial example:
+
+**Phone Unlock Integration**
+
+Objective:
+
+Allow users to initiate a phone-related action from a smartwatch widget.
+
+Platform restriction:
+
+Android does not allow ordinary third-party applications to bypass secure lock-screen authentication.
+
+Investigate Android Extend Unlock / trusted-device functionality as an optional companion configuration.
+
+Do not implement security bypass mechanisms.
+
+Other potential integrations:
+
+- Launch phone applications.
+- Find my phone.
+- Trigger phone notifications.
+- Control media playback.
+- Trigger configured shortcuts.
+
+## FR-008: Profile Management
+
+Users must be able to create multiple smartwatch profiles.
+
+Example profiles:
+
+| Profile | Theme | Intended Use |
+|---|---|---|
+| Minimal | Minimalist | Daily use |
+| DedSec | Hacker | Personal style |
+| JARVIS | AI interface | Interactive experience |
+| Music | Audio visualizer | Music playback |
+| Engineering | Technical dashboard | System information |
+
+Requirements:
+
+- Create profiles.
+- Rename profiles.
+- Duplicate profiles.
+- Delete profiles.
+- Switch profiles.
+- Synchronize active profile.
+- Persist configurations.
+
+---
+
+# 6. Data Architecture
+
+## 6.1 Configuration Model
+
+Use structured data models that can be serialized and synchronized between devices.
+
+Example:
+
+```json
+{
+  "schemaVersion": 1,
+  "profileId": "dedsec_profile",
+  "profileName": "DedSec",
+  "themeId": "dedsec_green",
+  "widgets": [
+    {
+      "widgetId": "clock_001",
+      "type": "digital_clock",
+      "position": {
+        "x": 0.5,
+        "y": 0.2
+      },
+      "size": {
+        "width": 0.8,
+        "height": 0.15
+      },
+      "zIndex": 1,
+      "settings": {
+        "format": "24h",
+        "showDate": true
+      }
+    }
+  ]
+}
+```
+
+Coordinates must be normalized between 0.0 and 1.0.
+
+Configuration models must support schema versioning.
+
+Implement Dart models with serialization and validation.
+
+## 6.2 Local Storage
+
+Phone:
+- SQLite / Drift or another suitable structured storage solution.
+- SharedPreferences or equivalent for simple preferences.
+
+Watch:
+- Local persistent configuration storage.
+- Local asset storage.
+- Last synchronized profile.
+
+Storage technology must be evaluated for Flutter and Wear OS compatibility.
+
+## 6.3 Synchronization
+
+Implement a synchronization manager.
+
+Responsibilities:
+
+- Detect configuration changes.
+- Serialize configuration.
+- Transfer configuration.
+- Validate received data.
+- Update local storage.
+- Notify the rendering engine.
+- Handle synchronization failures.
+
+Avoid transferring the entire configuration when only one widget property changes.
+
+Use incremental updates where practical.
+
+---
+
+# 7. User Interface Requirements
+
+## 7.1 Companion Application Navigation
+
+The Flutter companion application should contain five primary sections.
+
+**Home**
+- Connected smartwatch.
+- Active profile.
+- Current watch preview.
+- Quick profile switching.
+
+**Editor**
+- Watch preview.
+- Widget library.
+- Widget positioning.
+- Widget properties.
+- Theme preview.
+
+**Widgets**
+- Installed widgets.
+- Available widgets.
+- Widget configuration.
+
+**Themes**
+- Theme library.
+- Wallpaper selection.
+- Colour customization.
+- Typography customization.
+
+**Settings**
+- Watch connectivity.
+- Synchronization.
+- Application preferences.
+- Device information.
+
+## 7.2 Smartwatch Application Navigation
+
+The Wear OS application must prioritize a simple smartwatch-friendly interface.
+
+Primary screen:
+- Configured widget layout.
+- Time and date.
+- Interactive widget elements.
+
+Secondary interactions:
+- Tap to activate widgets.
+- Long press for widget-specific actions.
+- Swipe or other supported navigation gestures.
+- Return to the primary interface.
+
+The UI must adapt to circular screens, small touch targets and different resolutions.
+
+---
+
+# 8. Non-Functional Requirements
+
+## NFR-001: Performance
+
+- UI interactions must feel responsive.
+- Avoid unnecessary widget rebuilds.
+- Optimize image assets.
+- Avoid blocking the main thread.
+- Use efficient Flutter rendering.
+- Profile performance on actual Wear OS hardware.
+
+## NFR-002: Battery Efficiency
+
+- Minimize unnecessary background processing.
+- Avoid continuous synchronization.
+- Limit high-frequency animations.
+- Stop visualizer processing when not required.
+- Respect system lifecycle and ambient modes.
+- Investigate native implementation where Flutter lifecycle behaviour is insufficient.
+
+## NFR-003: Reliability
+
+- Preserve configurations after application restarts.
+- Handle interrupted synchronization.
+- Recover from invalid configurations.
+- Prevent duplicate widget registration.
+- Handle missing image assets gracefully.
+
+## NFR-004: Security
+
+- Use Android-supported communication mechanisms.
+- Validate synchronized configuration data.
+- Do not store sensitive credentials in plain text.
+- Respect Android permissions.
+- Do not bypass system security restrictions.
+
+## NFR-005: Compatibility
+
+- Support different Wear OS screen dimensions.
+- Support circular displays.
+- Verify Flutter compatibility with targeted Wear OS versions.
+- Handle unavailable hardware features gracefully.
+- Validate native WFF compatibility independently.
+
+---
+
+# 9. Development Phases
+
+Development must be incremental.
+
+Do not attempt to implement the entire application in one development cycle.
+
+## Phase 1 — Technical Feasibility and Foundation
+
+Objective: Verify the Flutter-first architecture.
+
+Tasks:
+
+- Create Flutter workspace.
+- Configure Android development environment.
+- Create Flutter companion application.
+- Create Flutter Wear OS proof of concept.
+- Test Flutter execution on a Wear OS emulator.
+- Test circular display compatibility.
+- Investigate native Android integration.
+- Establish phone-watch communication.
+- Test Data Layer API through native Kotlin integration.
+- Evaluate battery and performance implications.
+
+Deliverable:
+
+A technical feasibility report and working proof of concept.
+
+Acceptance criteria:
+
+- Flutter companion application builds successfully.
+- Flutter smartwatch application feasibility is established.
+- Phone and watch can exchange a test message.
+- Circular display rendering is verified.
+- Native integration requirements are documented.
+
+A decision must be made whether to proceed with Flutter or a native Kotlin runtime for the smartwatch application.
+
+## Phase 2 — UI Rendering Engine
+
+Objective: Develop the modular smartwatch interface.
+
+Tasks:
+
+- Implement configuration models.
+- Implement widget registry.
+- Implement widget containers.
+- Implement widget positioning.
+- Implement widget resizing.
+- Implement theme engine.
+- Implement configuration serialization.
+- Implement local configuration management.
+
+Deliverable:
+
+A smartwatch application capable of rendering multiple configurable widgets.
+
+Acceptance criteria:
+
+- Multiple widgets can be rendered.
+- Widgets can be positioned independently.
+- Widgets can be configured.
+- Themes can be changed without modifying widget logic.
+
+## Phase 3 — Flutter Companion Editor
+
+Objective: Develop the visual customization application.
+
+Tasks:
+
+- Create smartwatch preview.
+- Implement widget library.
+- Implement drag-and-drop.
+- Implement resize controls.
+- Implement theme selector.
+- Implement profile management.
+- Implement configuration synchronization.
+
+Deliverable:
+
+A functional Flutter customization editor.
+
+Acceptance criteria:
+
+- Users can create a smartwatch layout on their phone.
+- Layout changes synchronize to the watch.
+- Profiles can be saved and restored.
+
+## Phase 4 — Advanced Functionality
+
+Objective: Introduce advanced smartwatch features.
+
+Tasks:
+
+- JARVIS animations.
+- DedSec theme.
+- Music metadata integration.
+- Media playback controls.
+- Audio visualizer investigation.
+- Phone integration.
+- Haptic feedback.
+- Smart home widget investigation.
+
+Deliverable:
+
+A feature-rich interactive smartwatch experience.
+
+## Phase 5 — Native Watch Face
+
+Objective: Integrate with the Wear OS system watch-face environment.
+
+Tasks:
+
+- Create WFF implementation.
+- Implement time and date.
+- Implement supported complications.
+- Implement configurable colours and appearance.
+- Implement supported theme/profile configuration.
+- Validate watch-face compatibility.
+- Optimize ambient mode and power consumption.
+
+Deliverable:
+
+A separately packaged native watch face that complements Wear Studio.
+
+---
+
+# 10. Testing Strategy
+
+## Unit Testing
+
+Flutter:
+- Widget registration.
+- Configuration parsing.
+- Theme management.
+- Configuration validation.
+- State management.
+- Synchronization logic.
+
+Native Android:
+- Platform channel communication.
+- Data Layer integration.
+- WFF configuration handling.
+
+## Integration Testing
+
+- Phone-to-watch communication.
+- Configuration synchronization.
+- Asset transfer.
+- Profile switching.
+- Offline operation.
+- Flutter-to-native integration.
+
+## UI Testing
+
+- Drag-and-drop functionality.
+- Widget resizing.
+- Theme switching.
+- Watch interaction.
+- Navigation.
+
+## Device Testing
+
+- Android emulator.
+- Wear OS emulator.
+- Samsung Galaxy Watch, when available.
+- Google Pixel Watch, when available.
+
+## Performance Testing
+
+- Rendering performance.
+- Battery consumption.
+- Memory usage.
+- Animation performance.
+- Background execution.
+
+---
+
+# 11. Out of Scope for Initial Release
+
+The following features are not mandatory for the MVP:
+
+- Public third-party plugin marketplace.
+- Cloud account synchronization.
+- Social sharing of watch faces.
+- AI-powered theme generation.
+- User-created executable scripts.
+- Custom smartwatch firmware.
+- Replacement of the Wear OS operating system.
+- Arbitrary phone unlocking.
+- Full audio capture from every third-party media application.
+
+The architecture should allow future expansion without making these features dependencies of the MVP.
+
+---
+
+# 12. MVP Definition
+
+The first usable release must achieve:
+
+1. Flutter companion application runs.
+2. Wear OS runtime feasibility is established.
+3. Phone and watch communicate.
+4. Watch displays time and date.
+5. Watch supports at least three widget types.
+6. Widgets can be configured.
+7. Users can move and resize widgets through the phone editor.
+8. Users can change themes.
+9. Users can save multiple profiles.
+10. Configuration persists after restarting both applications.
+11. Watch continues operating without phone connectivity.
+
+The initial MVP must prioritize architectural correctness over visual complexity.
+
+---
+
+# 13. AI-Assisted Development Instructions
+
+Claude will be used as the primary AI coding assistant.
+
+Claude must follow these development rules.
+
+## Development Rules
+
+1. Read and understand the entire PRD before implementation.
+2. Use Flutter and Dart as the primary development technologies.
+3. Use Kotlin only where native Android or Wear OS integration is necessary.
+4. Propose the project structure before generating substantial code.
+5. Use modular architecture.
+6. Separate business logic from UI rendering.
+7. Avoid hardcoding widget configurations.
+8. Use reusable Flutter components.
+9. Follow current Flutter and Dart development conventions.
+10. Verify Wear OS API compatibility before implementation.
+11. Do not invent unsupported APIs.
+12. Do not implement simulated functionality while claiming it is fully functional.
+13. Document platform restrictions.
+14. Write tests for core functionality.
+15. Maintain a working build after every development milestone.
+
+## Implementation Workflow
+
+**Step 1: Architecture**
+
+- Review the PRD.
+- Identify technical dependencies.
+- Evaluate Flutter compatibility with Wear OS.
+- Propose project structure.
+- Define module responsibilities.
+- Identify technical risks.
+- Present the implementation plan.
+
+**Step 2: Foundation**
+
+- Generate Flutter workspace.
+- Configure Android application modules.
+- Create companion application.
+- Create smartwatch proof of concept.
+- Establish native communication.
+
+**Step 3: Core Engine**
+
+- Implement configuration models.
+- Implement widget architecture.
+- Implement theme engine.
+- Implement rendering system.
+
+**Step 4: Companion Application**
+
+- Implement editor.
+- Implement widget library.
+- Implement profile manager.
+- Implement synchronization.
+
+**Step 5: Advanced Functionality**
+
+- Implement animations.
+- Implement media integration.
+- Implement phone integrations.
+
+**Step 6: Native Watch Face**
+
+- Implement WFF package.
+- Integrate supported configuration.
+- Validate compatibility.
+
+Claude must not skip milestones or generate the entire application in one response.
+
+Before moving to the next milestone, provide:
+
+- Files created or modified.
+- Features implemented.
+- Build status.
+- Tests performed.
+- Known limitations.
+- Remaining tasks.
+
+---
+
+# 14. Official Technical References
+
+Claude must consult official documentation before implementing platform-specific functionality.
+
+**Flutter**
+- Flutter Documentation: https://docs.flutter.dev/
+- Flutter Architecture: https://docs.flutter.dev/app-architecture
+
+**Android**
+- Android Developers: https://developer.android.com/
+- Platform Channels: https://docs.flutter.dev/platform-integration/platform-channels
+
+**Wear OS**
+- Wear OS Development: https://developer.android.com/training/wearables
+- Watch Face Format: https://developer.android.com/training/wearables/wff
+- Wear OS Data Layer: https://developer.android.com/training/wearables/data/overview
+
+**Media Integration**
+- Android Media Playback Capture: https://developer.android.com/media/platform/av-capture
+- Android Visualizer API: https://developer.android.com/reference/android/media/audiofx/Visualizer
+
+---
+
+# 15. Final Product Vision
+
+Wear Studio is intended to evolve beyond a conventional smartwatch customization application.
+
+The long-term objective is to provide a modular smartwatch interface platform where users can independently customize the appearance, functionality and interaction of their smartwatch.
+
+The platform should make it possible to develop new widgets, themes and interactive experiences without rewriting the underlying system.
+
+**Core product philosophy:**
+
+- Customizable.
+- Modular.
+- Extensible.
+- Interactive.
+- Visually expressive.
+- Battery efficient.
+- Flutter-first.
+- Independent of smartphone connectivity for core functionality.
+
+The architecture must prioritize long-term extensibility while keeping the initial implementation manageable.
+
+**End of PRD — Wear Studio Version 1.1**

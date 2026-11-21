@@ -1,0 +1,28 @@
+name: wear_studio_platform
+description: >-
+  Thin Flutter plugin over native Wear OS / Android APIs: the Wear OS Data
+  Layer (nodes, capabilities, messages, data items) and device information.
+  Contains no business logic (PRD §2.2).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=5.0.0 <7.0.0"
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: com.wearstudio.wear_studio_platform
+        pluginClass: WearStudioPlatformPlugin

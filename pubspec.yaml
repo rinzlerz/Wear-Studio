@@ -1,0 +1,14 @@
+# Root of the Wear Studio Dart/Flutter pub workspace.
+# All members share one dependency resolution (requires Dart >= 3.6 / Flutter >= 3.27).
+# Run `flutter pub get` from this folder.
+name: wear_studio_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.6.0
+
+workspace:
+  - apps/companion
+  - apps/wear
+  - packages/core
+  - packages/platform
