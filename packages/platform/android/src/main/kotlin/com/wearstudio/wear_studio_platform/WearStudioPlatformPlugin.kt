@@ -3,6 +3,7 @@ package com.wearstudio.wear_studio_platform
 import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.BatteryManager
 import android.os.Build
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.CommonStatusCodes
@@ -65,6 +66,8 @@ class WearStudioPlatformPlugin :
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "getDeviceInfo" -> result.success(deviceInfo())
+
+            "getBatteryStatus" -> result.success(batteryStatus())
 
             "getLocalNode" ->
                 Wearable.getNodeClient(context).localNode
@@ -196,6 +199,18 @@ class WearStudioPlatformPlugin :
         "model" to Build.MODEL,
         "sdkInt" to Build.VERSION.SDK_INT,
     )
+
+    /** Reads the battery on demand; no receiver or polling on the native side. */
+    private fun batteryStatus(): Map<String, Any?> {
+        val manager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+            ?: return mapOf("level" to null, "charging" to null)
+        val capacity = manager.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+        return mapOf(
+            // Int.MIN_VALUE (or 0 on some devices) means "not supported".
+            "level" to if (capacity in 1..100) capacity else null,
+            "charging" to if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) manager.isCharging else null,
+        )
+    }
 
     private fun nodeToMap(node: Node): Map<String, Any?> = mapOf(
         "id" to node.id,

@@ -1,0 +1,30 @@
+name: wear_studio_widget_engine
+description: >-
+  Wear Studio UI rendering engine: the widget contract and registry, layout
+  from normalized coordinates, the watch-face canvas and the built-in
+  widgets. Shared by the watch runtime and (Phase 3) the phone preview.
+  Has no platform or state-management dependencies; data arrives through
+  WatchEnvironment.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wear_studio_core:
+    path: ../core
+  wear_studio_theme_engine:
+    path: ../theme_engine
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=5.0.0 <7.0.0"
+
+flutter:
+  uses-material-design: true

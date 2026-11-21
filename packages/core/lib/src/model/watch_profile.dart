@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import '../json_utils.dart';
 import '../schema.dart';
+import 'theme_overrides.dart';
 import 'widget_instance.dart';
 
 /// A complete, synchronizable watch configuration (PRD §6.1, FR-008).
@@ -11,6 +12,7 @@ class WatchProfile {
     required this.profileId,
     required this.profileName,
     required this.themeId,
+    this.themeOverrides = ThemeOverrides.none,
     this.widgets = const [],
   });
 
@@ -25,6 +27,9 @@ class WatchProfile {
       profileId: readString(migrated, 'profileId'),
       profileName: readString(migrated, 'profileName'),
       themeId: readString(migrated, 'themeId'),
+      themeOverrides: ThemeOverrides.fromJson(
+        readMap(migrated, 'themeOverrides', optional: true),
+      ),
       widgets: List.unmodifiable(
         readList(migrated, 'widgets').indexed.map(
               (entry) => WidgetInstance.fromJson(
@@ -42,6 +47,9 @@ class WatchProfile {
   final String profileId;
   final String profileName;
   final String themeId;
+
+  /// Customizations on top of the theme identified by [themeId].
+  final ThemeOverrides themeOverrides;
   final List<WidgetInstance> widgets;
 
   /// Widgets in paint order (lowest zIndex first; stable for ties).
@@ -59,6 +67,7 @@ class WatchProfile {
         'profileId': profileId,
         'profileName': profileName,
         'themeId': themeId,
+        'themeOverrides': themeOverrides.toJson(),
         'widgets': [for (final w in widgets) w.toJson()],
       };
 
@@ -68,6 +77,7 @@ class WatchProfile {
     String? profileId,
     String? profileName,
     String? themeId,
+    ThemeOverrides? themeOverrides,
     List<WidgetInstance>? widgets,
   }) =>
       WatchProfile(
@@ -75,6 +85,7 @@ class WatchProfile {
         profileId: profileId ?? this.profileId,
         profileName: profileName ?? this.profileName,
         themeId: themeId ?? this.themeId,
+        themeOverrides: themeOverrides ?? this.themeOverrides,
         widgets: widgets ?? this.widgets,
       );
 
@@ -85,6 +96,7 @@ class WatchProfile {
         other.profileId != profileId ||
         other.profileName != profileName ||
         other.themeId != themeId ||
+        other.themeOverrides != themeOverrides ||
         other.widgets.length != widgets.length) {
       return false;
     }
@@ -100,6 +112,7 @@ class WatchProfile {
         profileId,
         profileName,
         themeId,
+        themeOverrides,
         Object.hashAll(widgets),
       );
 

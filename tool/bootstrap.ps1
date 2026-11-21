@@ -163,6 +163,8 @@ Invoke-Checked flutter @('analyze', '--no-fatal-infos', 'apps', 'packages')
 Step 'Testing'
 Invoke-Checked dart @('test') (Join-Path $root 'packages/core')
 Invoke-Checked flutter @('test') (Join-Path $root 'packages/platform')
+Invoke-Checked flutter @('test') (Join-Path $root 'packages/theme_engine')
+Invoke-Checked flutter @('test') (Join-Path $root 'packages/widget_engine')
 Invoke-Checked flutter @('test') (Join-Path $root 'apps/companion')
 Invoke-Checked flutter @('test') (Join-Path $root 'apps/wear')
 

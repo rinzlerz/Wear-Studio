@@ -1,3 +1,4 @@
+import '../model/theme_overrides.dart';
 import '../model/watch_profile.dart';
 import '../model/widget_instance.dart';
 
@@ -64,6 +65,7 @@ class ProfileValidator {
     if (profile.themeId.trim().isEmpty) {
       error('themeId', 'must not be empty');
     }
+    _checkOverrides(profile.themeOverrides, error);
     if (profile.widgets.length > maxWidgets) {
       error(
           'widgets', 'has ${profile.widgets.length} widgets; max $maxWidgets');
@@ -87,6 +89,37 @@ class ProfileValidator {
     }
 
     return ValidationResult(List.unmodifiable(issues));
+  }
+
+  void _checkOverrides(
+    ThemeOverrides overrides,
+    void Function(String, String) error,
+  ) {
+    for (final MapEntry(:key, :value) in overrides.colors.entries) {
+      if (value != null && !ThemeOverrides.hexColorPattern.hasMatch(value)) {
+        error('themeOverrides.$key',
+            'must be #RRGGBB or #AARRGGBB (was "$value")');
+      }
+    }
+    final scale = overrides.fontScale;
+    if (scale != null &&
+        (!scale.isFinite ||
+            scale < ThemeOverrides.minFontScale ||
+            scale > ThemeOverrides.maxFontScale)) {
+      error(
+        'themeOverrides.fontScale',
+        'must be between ${ThemeOverrides.minFontScale} and '
+            '${ThemeOverrides.maxFontScale} (was $scale)',
+      );
+    }
+    final intensity = overrides.animationIntensity;
+    if (intensity != null &&
+        (!intensity.isFinite || intensity < 0 || intensity > 1)) {
+      error(
+        'themeOverrides.animationIntensity',
+        'must be between 0.0 and 1.0 (was $intensity)',
+      );
+    }
   }
 
   void _checkGeometry(

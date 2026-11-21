@@ -44,8 +44,10 @@ responsibilities are established. Phase 1 has two:
 | `core` | Models, JSON, schema versioning, validation, sync protocol | Pure Dart, shared by both apps, fast unit tests |
 | `platform` | Kotlin bridge (Data Layer, device info) | Native code shared by both apps through Flutter's plugin mechanism |
 
-`widget_engine` and `theme_engine` are expected to split out of `core`/`wear`
-in Phase 2 when the renderer exists. `communication`, `configuration` and
+Phase 2 added `theme_engine` and `widget_engine` (Flutter, no platform or
+Riverpod dependency) so the phone editor can reuse the exact renderer as its
+live preview in Phase 3. `widget_engine` depends on `theme_engine`, never the
+reverse, which enforces "themes are independent of widget functionality". `communication`, `configuration` and
 `data` from the PRD map onto `core` + `platform` for now.
 
 ### D3. Native code lives in a Flutter plugin, not a top-level `native/`
@@ -127,3 +129,23 @@ rejects values outside range and warns when a widget overflows the screen.
 | Ambient mode / lifecycle in Flutter | Battery drain, burn-in | Evaluate AmbientLifecycleObserver via the plugin |
 | Phone/watch id or signing mismatch | Sync silently does nothing | D4, documented in setup |
 | Theme names "DedSec"/"JARVIS" are third-party trademarks | Store rejection | Rename before any public release |
+
+## Rendering (Phase 2)
+
+```text
+WatchProfile ──► ThemeRegistry.forProfile ──► WatchTheme (+ overrides)
+      │                                            │
+      └─► resolveLayout(registry, side) ──► [ResolvedWidget rect, settings]
+                                                   │
+WatchFaceCanvas: background → Positioned(key = widgetId) → WidgetFrame
+                 → WatchWidgetDefinition.build(context, WatchWidgetContext)
+                                                   ▲
+WatchEnvironmentScope (clock, battery, phone link) ┘  supplied by the host app
+```
+
+- Widgets read data only from `WatchEnvironment`, so the same widgets run
+  on the watch (live data) and in the phone preview (fixed or mirrored data).
+- The host owns update frequency: one clock tick and one battery read per
+  minute, both stopped when the app is hidden.
+- Each widget sits in its own `RepaintBoundary` with a stable key, so one
+  widget changing does not repaint or reset the others.

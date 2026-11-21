@@ -104,3 +104,22 @@ int jsonDeepHash(Object? value) {
   if (value is List) return Object.hashAll(value.map(jsonDeepHash));
   return value.hashCode;
 }
+
+String? readOptionalString(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value == null || value is String) return value as String?;
+  throw FormatException(_describe(key, 'a string', value));
+}
+
+double? readOptionalDouble(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
+  throw FormatException(_describe(key, 'a number', value));
+}
+
+bool? readOptionalBool(Map<String, Object?> json, String key) {
+  final value = json[key];
+  if (value == null || value is bool) return value as bool?;
+  throw FormatException(_describe(key, 'a boolean', value));
+}

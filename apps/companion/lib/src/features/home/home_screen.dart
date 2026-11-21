@@ -33,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
           children: [
             _WatchCard(state: state, onSelect: controller.selectWatch),
             const SizedBox(height: 16),
-            Text('Phase 1 tests',
+            Text('Test actions',
                 style: Theme.of(context).textTheme.titleMedium),
             const SizedBox(height: 8),
             Wrap(
@@ -45,18 +45,12 @@ class HomeScreen extends ConsumerWidget {
                   icon: const Icon(Icons.wifi_tethering),
                   label: const Text('Ping watch'),
                 ),
-                FilledButton.tonalIcon(
-                  onPressed: () =>
-                      controller.pushProfile(SampleProfiles.minimal),
-                  icon: const Icon(Icons.upload),
-                  label: const Text('Send "Minimal"'),
-                ),
-                FilledButton.tonalIcon(
-                  onPressed: () =>
-                      controller.pushProfile(SampleProfiles.prdExample),
-                  icon: const Icon(Icons.upload),
-                  label: const Text('Send PRD example'),
-                ),
+                for (final profile in SampleProfiles.all)
+                  FilledButton.tonalIcon(
+                    onPressed: () => controller.pushProfile(profile),
+                    icon: const Icon(Icons.upload),
+                    label: Text('Send "${profile.profileName}"'),
+                  ),
               ],
             ),
             const SizedBox(height: 8),

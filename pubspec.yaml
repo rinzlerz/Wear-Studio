@@ -12,3 +12,5 @@ workspace:
   - apps/wear
   - packages/core
   - packages/platform
+  - packages/theme_engine
+  - packages/widget_engine

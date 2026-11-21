@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wear_studio_core/wear_studio_core.dart';
 import 'package:wear_studio_platform/wear_studio_platform.dart';
+import 'package:wear_studio_widget_engine/wear_studio_widget_engine.dart'
+    show PhoneLinkState;
 import 'package:wear_studio_wear/src/app.dart';
 import 'package:wear_studio_wear/src/data/profile_store.dart';
 import 'package:wear_studio_wear/src/features/watch/watch_controller.dart';
@@ -46,11 +48,18 @@ class FakeDataLayer implements DataLayer {
 
 const phone = WearNode(id: 'p1', displayName: 'Phone', isNearby: true);
 
+class FakeBatterySource implements BatterySource {
+  @override
+  Future<BatteryStatus> read() async =>
+      const BatteryStatus(level: 77, charging: false);
+}
+
 ProviderContainer containerWith(FakeDataLayer fake, MemoryProfileStore store) {
   final container = ProviderContainer(
     overrides: [
       dataLayerProvider.overrideWithValue(fake),
       profileStoreProvider.overrideWithValue(store),
+      batterySourceProvider.overrideWithValue(FakeBatterySource()),
       deviceInfoProvider.overrideWith((ref) async => WearDeviceInfo.unknown),
     ],
   );
@@ -82,7 +91,7 @@ void main() {
     final state = container.read(watchControllerProvider);
     expect(state.profile, SampleProfiles.minimal);
     expect(state.revision, 5);
-    expect(state.phoneLink, PhoneLink.disconnected);
+    expect(state.phoneLink, PhoneLinkState.disconnected);
   });
 
   test('catches up from Data Layer items and persists them', () async {
@@ -157,9 +166,8 @@ void main() {
     expect(SyncEnvelope.decode(bytes).pingId, 'xyz');
   });
 
-  testWidgets('shows the clock and the profile name', (tester) async {
-    final store =
-        MemoryProfileStore(StoredProfile(SampleProfiles.prdExample, 1));
+  testWidgets('renders the stored profile with live data', (tester) async {
+    final store = MemoryProfileStore(StoredProfile(SampleProfiles.minimal, 1));
     final container = containerWith(FakeDataLayer(phones: [phone]), store);
     tester.view.physicalSize = const Size(454, 454);
     tester.view.devicePixelRatio = 2;
@@ -171,8 +179,51 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.textContaining('DedSec'), findsOneWidget);
-    expect(find.text('Phone connected'), findsOneWidget);
-    expect(find.text('Ping phone'), findsOneWidget);
+    for (final w in SampleProfiles.minimal.widgets) {
+      expect(find.byKey(ValueKey(w.widgetId)), findsOneWidget);
+    }
+    expect(find.text('Phone'), findsOneWidget); // system status widget
+    expect(find.text('77%'), findsOneWidget); // battery widget
+  });
+
+  testWidgets('shows the default layout before any profile arrives',
+      (tester) async {
+    final container = containerWith(FakeDataLayer(), MemoryProfileStore());
+    tester.view.physicalSize = const Size(454, 454);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const WearApp()),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('clock_001')), findsOneWidget);
+    expect(find.text('Offline'), findsOneWidget);
+  });
+
+  testWidgets('a new profile from the phone switches theme and layout',
+      (tester) async {
+    final fake = FakeDataLayer(phones: [phone]);
+    final container = containerWith(fake, MemoryProfileStore());
+    tester.view.physicalSize = const Size(454, 454);
+    tester.view.devicePixelRatio = 2;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      UncontrolledProviderScope(container: container, child: const WearApp()),
+    );
+    await tester.pump();
+
+    fake.events$.add(profileEvent(5, SampleProfiles.hacker));
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+        container.read(watchControllerProvider).profile, SampleProfiles.hacker);
+    // Hacker uses the text-style battery widget.
+    expect(find.text('77%'), findsOneWidget);
+    expect(find.byKey(const ValueKey('status_001')), findsOneWidget);
   });
 }

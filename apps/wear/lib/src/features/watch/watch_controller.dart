@@ -3,17 +3,17 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wear_studio_core/wear_studio_core.dart';
 import 'package:wear_studio_platform/wear_studio_platform.dart';
+import 'package:wear_studio_widget_engine/wear_studio_widget_engine.dart'
+    show PhoneLinkState;
 
 import '../../data/profile_store.dart';
 import '../../providers.dart';
-
-enum PhoneLink { unknown, connected, disconnected, unavailable }
 
 class WatchState {
   const WatchState({
     this.profile,
     this.revision,
-    this.phoneLink = PhoneLink.unknown,
+    this.phoneLink = PhoneLinkState.unknown,
     this.phoneNodeId,
     this.lastSyncAt,
     this.lastRoundTrip,
@@ -23,7 +23,7 @@ class WatchState {
   /// Active profile; null until one has been received or loaded.
   final WatchProfile? profile;
   final int? revision;
-  final PhoneLink phoneLink;
+  final PhoneLinkState phoneLink;
   final String? phoneNodeId;
   final DateTime? lastSyncAt;
   final Duration? lastRoundTrip;
@@ -32,7 +32,7 @@ class WatchState {
   WatchState copyWith({
     WatchProfile? profile,
     int? revision,
-    PhoneLink? phoneLink,
+    PhoneLinkState? phoneLink,
     String? Function()? phoneNodeId,
     DateTime? lastSyncAt,
     Duration? lastRoundTrip,
@@ -110,14 +110,17 @@ class WatchController extends Notifier<WatchState> {
           ? null
           : phones.firstWhere((n) => n.isNearby, orElse: () => phones.first);
       state = state.copyWith(
-        phoneLink: phone == null ? PhoneLink.disconnected : PhoneLink.connected,
+        phoneLink: phone == null
+            ? PhoneLinkState.disconnected
+            : PhoneLinkState.connected,
         phoneNodeId: () => phone?.id,
       );
     } on DataLayerException catch (e) {
       if (!ref.mounted) return;
       state = state.copyWith(
-        phoneLink:
-            e.isUnavailable ? PhoneLink.unavailable : PhoneLink.disconnected,
+        phoneLink: e.isUnavailable
+            ? PhoneLinkState.unavailable
+            : PhoneLinkState.disconnected,
         phoneNodeId: () => null,
       );
       _log('phone lookup failed: $e');
@@ -209,7 +212,7 @@ class WatchController extends Notifier<WatchState> {
       _log('answered ping');
       if (!ref.mounted) return;
       state = state.copyWith(
-        phoneLink: PhoneLink.connected,
+        phoneLink: PhoneLinkState.connected,
         phoneNodeId: () => event.sourceNodeId,
       );
     } on FormatException catch (e) {
@@ -223,8 +226,8 @@ class WatchController extends Notifier<WatchState> {
     try {
       final rtt = _pings.resolvePong(SyncEnvelope.decode(event.data));
       if (rtt == null || !ref.mounted) return;
-      state =
-          state.copyWith(lastRoundTrip: rtt, phoneLink: PhoneLink.connected);
+      state = state.copyWith(
+          lastRoundTrip: rtt, phoneLink: PhoneLinkState.connected);
       _log('pong ${rtt.inMilliseconds} ms');
     } on FormatException catch (e) {
       _log('bad pong: ${e.message}');

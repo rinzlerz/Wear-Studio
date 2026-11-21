@@ -32,7 +32,8 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen> {
       ],
       'Logical ${size.width.toStringAsFixed(0)}×${size.height.toStringAsFixed(0)} '
           '@${ratio.toStringAsFixed(2)}x',
-      'Profile rev ${state.revision ?? '-'}',
+      'Profile ${state.profile?.profileName ?? '(default)'} · rev ${state.revision ?? '-'}',
+      if (state.profile != null) 'Theme ${state.profile!.themeId}',
       'Phone ${state.phoneLink.name}',
       if (state.lastSyncAt != null) 'Last sync ${state.lastSyncAt}',
       '',
@@ -44,6 +45,21 @@ class _DiagnosticsScreenState extends ConsumerState<DiagnosticsScreen> {
         round: info?.isScreenRound ?? true,
         child: ListView(
           children: [
+            Center(
+              child: SizedBox(
+                height: 48,
+                child: FilledButton.tonal(
+                  onPressed:
+                      ref.read(watchControllerProvider.notifier).pingPhone,
+                  child: Text(
+                    state.lastRoundTrip == null
+                        ? 'Ping phone'
+                        : 'Ping · ${state.lastRoundTrip!.inMilliseconds} ms',
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
             Center(
               child: SizedBox(
                 height: 48,

@@ -1,0 +1,23 @@
+name: wear_studio_theme_engine
+description: >-
+  Wear Studio theme engine: theme definitions, the built-in themes, user
+  overrides and the inherited scope that widgets read their styling from.
+  Contains no widget logic (PRD FR-004: themes are independent of widgets).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  wear_studio_core:
+    path: ../core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ">=5.0.0 <7.0.0"

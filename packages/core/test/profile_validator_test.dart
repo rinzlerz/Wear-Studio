@@ -15,7 +15,7 @@ void main() {
       SampleProfiles.minimal.copyWith(widgets: widgets);
 
   test('sample profiles are valid with no warnings', () {
-    for (final p in [SampleProfiles.minimal, SampleProfiles.prdExample]) {
+    for (final p in [...SampleProfiles.all, SampleProfiles.prdExample]) {
       final result = validator.validate(p);
       expect(result.issues, isEmpty, reason: result.toString());
     }
@@ -90,5 +90,28 @@ void main() {
     );
 
     expect(result.errors.single.path, 'widgets');
+  });
+
+  test('theme override colours must be hex', () {
+    final result = validator.validate(SampleProfiles.minimal.copyWith(
+      themeOverrides: const ThemeOverrides(primary: 'green', accent: '#00FF00'),
+    ));
+
+    expect(result.errors.single.path, 'themeOverrides.primary');
+  });
+
+  test('font scale and animation intensity are range-checked', () {
+    final result = validator.validate(SampleProfiles.minimal.copyWith(
+      themeOverrides:
+          const ThemeOverrides(fontScale: 3, animationIntensity: -1),
+    ));
+
+    expect(
+      result.errors.map((e) => e.path),
+      containsAll([
+        'themeOverrides.fontScale',
+        'themeOverrides.animationIntensity',
+      ]),
+    );
   });
 }

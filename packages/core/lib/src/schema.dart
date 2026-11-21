@@ -5,7 +5,10 @@
 /// [migrateProfileJson] that upgrades version N to N+1.
 library;
 
-const int currentSchemaVersion = 1;
+/// Version history:
+/// * 1: initial format (PRD §6.1).
+/// * 2: adds optional `themeOverrides` (Phase 2, theme engine).
+const int currentSchemaVersion = 2;
 
 class UnsupportedSchemaVersionException implements Exception {
   const UnsupportedSchemaVersionException(this.version);
@@ -31,8 +34,11 @@ Map<String, Object?> migrateProfileJson(Map<String, Object?> json) {
   }
 
   var migrated = Map<String, Object?>.of(json);
-  // Add steps here as the schema evolves, e.g.:
-  // if (version < 2) migrated = _v1ToV2(migrated);
+  if (version < 2) migrated = _v1ToV2(migrated);
+  // Add further steps here as the schema evolves.
   migrated['schemaVersion'] = currentSchemaVersion;
   return migrated;
 }
+
+Map<String, Object?> _v1ToV2(Map<String, Object?> json) =>
+    {...json, 'themeOverrides': json['themeOverrides'] ?? <String, Object?>{}};

@@ -3,6 +3,7 @@ library;
 
 export 'src/json_utils.dart' show jsonDeepEquals, jsonDeepHash;
 export 'src/model/normalized.dart';
+export 'src/model/theme_overrides.dart';
 export 'src/model/watch_profile.dart';
 export 'src/model/widget_instance.dart';
 export 'src/model/widget_types.dart';

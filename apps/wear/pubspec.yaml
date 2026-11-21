@@ -18,6 +18,10 @@ dependencies:
     path: ../../packages/core
   wear_studio_platform:
     path: ../../packages/platform
+  wear_studio_theme_engine:
+    path: ../../packages/theme_engine
+  wear_studio_widget_engine:
+    path: ../../packages/widget_engine
 
 dev_dependencies:
   flutter_test:

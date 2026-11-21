@@ -81,4 +81,15 @@ void main() {
     expect(info.isWatch, isFalse);
     expect(info.model, 'unknown');
   });
+
+  test('battery status is parsed and falls back to unknown', () async {
+    mockHandler((call) async => {'level': 64, 'charging': true});
+    final status = await MethodChannelBatterySource().read();
+    expect(status.level, 64);
+    expect(status.charging, isTrue);
+
+    messenger.setMockMethodCallHandler(channel, null);
+    final fallback = await MethodChannelBatterySource().read();
+    expect(fallback.level, isNull);
+  });
 }
